@@ -1,0 +1,18 @@
+Package: sysmon
+Version: 1.0.0
+Section: utils
+Priority: optional
+Architecture: all
+Depends: python3 (>= 3.6), python3-tk, python3-psutil
+Maintainer: System Monitor Team <sysmon@example.com>
+Description: Beautiful desktop system monitor for Linux
+ Desktop System Monitor shows real-time system statistics
+ on your desktop with a beautiful dark theme interface.
+ .
+ Features:
+  - CPU, RAM, Disk, Network monitoring
+  - Temperature sensors support
+  - Color-coded indicators
+  - Always-on-top transparent window
+  - Minimal resource usage
+Homepage: https://github.com/Bakstag1337/solid-octo-fiesta

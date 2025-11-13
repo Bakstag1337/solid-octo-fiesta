@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=System Monitor
+GenericName=System Monitor Widget
+Comment=Beautiful desktop system monitor showing real-time stats
+Exec=sysmon
+Icon=sysmon
+Terminal=false
+Categories=System;Monitor;Utility;
+Keywords=system;monitor;cpu;ram;disk;network;temperature;
+StartupNotify=true

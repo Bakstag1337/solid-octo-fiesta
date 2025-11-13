@@ -36,10 +36,41 @@
 
 ## 🚀 Установка
 
-### Автоматическая установка
+### 🎯 Рекомендуется: DEB пакет (для Ubuntu/Debian/Mint/Pop!_OS и т.д.)
+
+**Самый простой способ!** Скачай готовый .deb пакет и установи:
 
 ```bash
-git clone https://github.com/yourusername/solid-octo-fiesta.git
+# Скачай репозиторий
+git clone https://github.com/Bakstag1337/solid-octo-fiesta.git
+cd solid-octo-fiesta
+
+# Установи пакет
+sudo dpkg -i sysmon_1.0.0_all.deb
+
+# Если будут ошибки зависимостей, исправь их:
+sudo apt-get install -f
+```
+
+**Готово!** Теперь просто запусти:
+```bash
+sysmon
+```
+
+Или найди "System Monitor" в меню приложений!
+
+### Удаление
+
+```bash
+sudo apt-get remove sysmon
+```
+
+---
+
+### Альтернативный способ: Скрипт установки
+
+```bash
+git clone https://github.com/Bakstag1337/solid-octo-fiesta.git
 cd solid-octo-fiesta
 chmod +x install.sh
 ./install.sh
@@ -48,7 +79,7 @@ chmod +x install.sh
 ### Ручная установка
 
 ```bash
-git clone https://github.com/yourusername/solid-octo-fiesta.git
+git clone https://github.com/Bakstag1337/solid-octo-fiesta.git
 cd solid-octo-fiesta
 pip3 install -r requirements.txt --user
 chmod +x src/sysmon.py
@@ -56,7 +87,15 @@ chmod +x src/sysmon.py
 
 ## 💡 Использование
 
-Запустите программу командой:
+### Если установили через .deb пакет:
+
+```bash
+sysmon
+```
+
+Или найдите **"System Monitor"** в меню приложений (Applications → System Tools).
+
+### Если установили вручную:
 
 ```bash
 ./src/sysmon.py

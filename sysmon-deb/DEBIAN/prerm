@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+
+# Kill any running instances
+pkill -f "python3.*sysmon" || true
+
+exit 0
