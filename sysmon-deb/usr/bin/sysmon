@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Desktop System Monitor - Beautiful real-time system stats on your desktop
+Sticks to wallpaper like Conky!
 """
 
 import tkinter as tk
@@ -10,26 +11,42 @@ import platform
 from datetime import timedelta
 import threading
 import time
+import subprocess
+import os
 
 
 class SystemMonitor(tk.Tk):
     def __init__(self):
         super().__init__()
 
-        # Window configuration
+        # Window configuration - stick to desktop!
         self.title("System Monitor")
-        self.attributes('-topmost', True)  # Always on top
-        self.attributes('-alpha', 0.9)  # Transparency
-        self.overrideredirect(False)  # Show window decorations
+        self.overrideredirect(True)  # No window decorations
+        self.attributes('-alpha', 0.85)  # Semi-transparent
 
-        # Window size and position
-        self.geometry("350x450+50+50")
+        # Try to set window type to desktop (X11)
+        try:
+            self.attributes('-type', 'desktop')
+        except:
+            pass
+
+        # Window size and position (bottom right corner by default)
+        screen_width = self.winfo_screenwidth()
+        screen_height = self.winfo_screenheight()
+        widget_width = 350
+        widget_height = 480
+
+        # Position in bottom-right corner with some padding
+        x_pos = screen_width - widget_width - 20
+        y_pos = 60  # Top position
+
+        self.geometry(f"{widget_width}x{widget_height}+{x_pos}+{y_pos}")
         self.resizable(False, False)
 
-        # Configure dark theme colors
-        self.bg_color = "#1e1e1e"
+        # Configure dark theme colors with more transparency
+        self.bg_color = "#1a1a1a"
         self.fg_color = "#ffffff"
-        self.accent_color = "#0078d4"
+        self.accent_color = "#00d4ff"
 
         self.configure(bg=self.bg_color)
 
@@ -39,33 +56,92 @@ class SystemMonitor(tk.Tk):
         # Create UI
         self.create_widgets()
 
+        # Set window to stay on desktop (below all windows)
+        self.after(100, self.stick_to_desktop)
+
         # Start monitoring
         self.update_interval = 1000  # 1 second
         self.running = True
         self.update_stats()
 
-        # Bind dragging events
-        self.bind("<ButtonPress-1>", self.start_drag)
-        self.bind("<ButtonRelease-1>", self.stop_drag)
-        self.bind("<B1-Motion>", self.on_drag)
+        # Bind dragging events (right-click to drag)
+        self.bind("<Button-3>", self.start_drag)
+        self.bind("<ButtonRelease-3>", self.stop_drag)
+        self.bind("<B3-Motion>", self.on_drag)
 
-        # Handle window close
-        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+        # Double-click to close
+        self.bind("<Double-Button-1>", lambda e: self.on_closing())
+
+    def stick_to_desktop(self):
+        """Make window stick to desktop background using wmctrl"""
+        try:
+            # Get window ID
+            window_id = self.wm_frame()
+
+            # Try wmctrl first
+            subprocess.run([
+                'wmctrl', '-i', '-r', str(window_id),
+                '-b', 'add,below,sticky'
+            ], check=False, capture_output=True)
+
+            # Also try setting window type
+            subprocess.run([
+                'xprop', '-id', str(window_id),
+                '-f', '_NET_WM_WINDOW_TYPE', '32a',
+                '-set', '_NET_WM_WINDOW_TYPE', '_NET_WM_WINDOW_TYPE_DESKTOP'
+            ], check=False, capture_output=True)
+
+        except Exception as e:
+            # Fallback: just put it below other windows
+            try:
+                self.attributes('-topmost', False)
+                self.lower()
+            except:
+                pass
 
     def create_widgets(self):
-        # Main container
-        main_frame = tk.Frame(self, bg=self.bg_color, padx=20, pady=20)
+        # Main container with border
+        main_frame = tk.Frame(self, bg=self.bg_color, padx=15, pady=15,
+                             highlightbackground=self.accent_color,
+                             highlightthickness=1)
         main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # Header with close button
+        header_frame = tk.Frame(main_frame, bg=self.bg_color)
+        header_frame.pack(fill=tk.X, pady=(0, 5))
 
         # Title
         title = tk.Label(
-            main_frame,
+            header_frame,
             text="⚡ System Monitor",
-            font=("Arial", 18, "bold"),
+            font=("Arial", 16, "bold"),
             bg=self.bg_color,
-            fg=self.accent_color
+            fg=self.accent_color,
+            anchor="w"
         )
-        title.pack(pady=(0, 20))
+        title.pack(side=tk.LEFT)
+
+        # Close button
+        close_btn = tk.Label(
+            header_frame,
+            text="✕",
+            font=("Arial", 14, "bold"),
+            bg=self.bg_color,
+            fg="#ff5555",
+            cursor="hand2"
+        )
+        close_btn.pack(side=tk.RIGHT)
+        close_btn.bind("<Button-1>", lambda e: self.on_closing())
+
+        # Control hint
+        hint_label = tk.Label(
+            main_frame,
+            text="Double-click ✕ to close | Right-click to drag",
+            font=("Arial", 7),
+            bg=self.bg_color,
+            fg="#555555"
+        )
+        hint_label.pack(pady=(0, 10))
 
         # Hostname
         hostname = platform.node()
@@ -330,10 +406,15 @@ class SystemMonitor(tk.Tk):
 
 
 def main():
+    print("Starting Desktop System Monitor...")
+    print("Close the window or press Ctrl+C to exit.")
+
     app = SystemMonitor()
+
     try:
         app.mainloop()
     except KeyboardInterrupt:
+        print("\nShutting down...")
         app.running = False
 
 

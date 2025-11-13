@@ -5,8 +5,8 @@
 ### Способ 1: Одной командой
 
 ```bash
-wget https://github.com/Bakstag1337/solid-octo-fiesta/raw/main/sysmon_1.0.0_all.deb
-sudo dpkg -i sysmon_1.0.0_all.deb
+wget https://github.com/Bakstag1337/solid-octo-fiesta/raw/main/sysmon_1.1.0_all.deb
+sudo dpkg -i sysmon_1.1.0_all.deb
 sudo apt-get install -f
 ```
 
@@ -18,7 +18,7 @@ git clone https://github.com/Bakstag1337/solid-octo-fiesta.git
 cd solid-octo-fiesta
 
 # Установи пакет
-sudo dpkg -i sysmon_1.0.0_all.deb
+sudo dpkg -i sysmon_1.1.0_all.deb
 
 # Если есть ошибки зависимостей, исправь:
 sudo apt-get install -f

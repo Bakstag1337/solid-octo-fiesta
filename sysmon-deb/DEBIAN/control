@@ -1,18 +1,21 @@
 Package: sysmon
-Version: 1.0.0
+Version: 1.1.0
 Section: utils
 Priority: optional
 Architecture: all
-Depends: python3 (>= 3.6), python3-tk, python3-psutil
+Depends: python3 (>= 3.6), python3-tk, python3-psutil, wmctrl, x11-utils
 Maintainer: System Monitor Team <sysmon@example.com>
-Description: Beautiful desktop system monitor for Linux
+Description: Beautiful desktop system monitor for Linux (Conky-style widget)
  Desktop System Monitor shows real-time system statistics
- on your desktop with a beautiful dark theme interface.
+ directly on your desktop wallpaper with a beautiful dark theme.
+ Sticks to desktop like Conky!
  .
  Features:
   - CPU, RAM, Disk, Network monitoring
   - Temperature sensors support
   - Color-coded indicators
-  - Always-on-top transparent window
+  - Sticks to desktop wallpaper (below all windows)
+  - Semi-transparent widget
+  - Right-click to drag, double-click to close
   - Minimal resource usage
 Homepage: https://github.com/Bakstag1337/solid-octo-fiesta
