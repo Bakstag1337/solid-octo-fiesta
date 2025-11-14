@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Embedded Data</title>
+</head>
+<body>
+    <h1>Test Embedded Data Loading</h1>
+    <div id="output"></div>
+
+    <script src="js/embedded-data.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        try {
+            // Test getEmbeddedData function
+            const aaplData = getEmbeddedData('AAPL');
+            const tslaData = getEmbeddedData('TSLA');
+            const msftData = getEmbeddedData('MSFT');
+
+            output.innerHTML = `
+                <h2>✅ Embedded Data Test: SUCCESS</h2>
+                <p><strong>AAPL:</strong> ${aaplData ? aaplData.data.length + ' days loaded' : 'FAILED'}</p>
+                <p><strong>TSLA:</strong> ${tslaData ? tslaData.data.length + ' days loaded' : 'FAILED'}</p>
+                <p><strong>MSFT:</strong> ${msftData ? msftData.data.length + ' days loaded' : 'FAILED'}</p>
+
+                <h3>Available Tickers:</h3>
+                <p>${getAvailableTickers().join(', ')}</p>
+
+                <h3>Sample AAPL Data (first 3 days):</h3>
+                <pre>${JSON.stringify(aaplData.data.slice(0, 3), null, 2)}</pre>
+            `;
+
+            console.log('✅ All tests passed!');
+            console.log('AAPL data:', aaplData.data.length, 'days');
+            console.log('TSLA data:', tslaData.data.length, 'days');
+            console.log('MSFT data:', msftData.data.length, 'days');
+
+        } catch (error) {
+            output.innerHTML = `
+                <h2>❌ Embedded Data Test: FAILED</h2>
+                <p style="color: red;"><strong>Error:</strong> ${error.message}</p>
+                <pre>${error.stack}</pre>
+            `;
+            console.error('Test failed:', error);
+        }
+    </script>
+</body>
+</html>
