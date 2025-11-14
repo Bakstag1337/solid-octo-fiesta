@@ -2,10 +2,13 @@
 
 const app = {
     backtester: new Backtester(),
+    optimizer: null,
     chartsManager: new ChartsManager(),
     currentResults: null,
+    optimizationResults: null,
 
     init() {
+        this.optimizer = new ParameterOptimizer(this.backtester);
         this.bindEvents();
         this.setupDataSourceToggle();
     },
@@ -124,12 +127,15 @@ const app = {
     },
 
     async runBacktest() {
-        const strategies = this.getSelectedStrategies();
+        const selectedStrategies = document.querySelectorAll('input[name="strategy"]:checked');
+        const strategyTypes = Array.from(selectedStrategies).map(cb => cb.value);
 
-        if (strategies.length === 0) {
+        if (strategyTypes.length === 0) {
             alert('Выберите хотя бы одну стратегию!');
             return;
         }
+
+        const optimizeParams = document.getElementById('optimizeParams').checked;
 
         // Show loading
         document.getElementById('loading').style.display = 'block';
@@ -139,26 +145,201 @@ const app = {
         await new Promise(resolve => setTimeout(resolve, 100));
 
         try {
-            const data = this.getData();
+            const data = await this.getData();
+            const initialCapital = parseFloat(document.getElementById('initialCapital').value);
 
-            const params = {
-                initialCapital: parseFloat(document.getElementById('initialCapital').value),
-                stopLoss: parseFloat(document.getElementById('stopLoss').value),
-                takeProfit: parseFloat(document.getElementById('takeProfit').value)
-            };
+            if (optimizeParams) {
+                // Run optimization
+                await this.runOptimization(strategyTypes, data, initialCapital);
+            } else {
+                // Run regular backtest
+                const strategies = this.getSelectedStrategies();
+                const params = {
+                    initialCapital: initialCapital,
+                    stopLoss: parseFloat(document.getElementById('stopLoss').value),
+                    takeProfit: parseFloat(document.getElementById('takeProfit').value)
+                };
 
-            // Run backtest
-            const results = this.backtester.runBacktest(strategies, data, params);
-            this.currentResults = results;
-
-            // Display results
-            this.displayResults(results);
+                const results = this.backtester.runBacktest(strategies, data, params);
+                this.currentResults = results;
+                this.displayResults(results);
+            }
 
         } catch (error) {
             alert('Ошибка при выполнении бэктеста: ' + error.message);
             console.error(error);
         } finally {
             document.getElementById('loading').style.display = 'none';
+            document.getElementById('optimizationProgress').style.display = 'none';
+        }
+    },
+
+    async runOptimization(strategyTypes, data, initialCapital) {
+        const loadingText = document.getElementById('loadingText');
+        const optimizationProgress = document.getElementById('optimizationProgress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+
+        loadingText.textContent = 'Оптимизация параметров...';
+        optimizationProgress.style.display = 'block';
+
+        const onProgress = (strategyName, tested, total, status) => {
+            if (status === 'starting') {
+                progressText.textContent = `Оптимизация ${strategyName}...`;
+                progressFill.style.width = '0%';
+            } else if (status === 'testing') {
+                const percent = (tested / total * 100).toFixed(0);
+                progressFill.style.width = percent + '%';
+                progressText.textContent = `${strategyName}: ${tested} / ${total} комбинаций (${percent}%)`;
+            } else if (status === 'complete') {
+                progressFill.style.width = '100%';
+                progressText.textContent = `${strategyName}: готово!`;
+            }
+        };
+
+        const optimizationResults = await this.optimizer.optimizeAll(
+            strategyTypes,
+            data,
+            initialCapital,
+            onProgress
+        );
+
+        this.optimizationResults = optimizationResults;
+
+        // Run backtest with best parameters
+        await this.runBacktestWithOptimizedParams(optimizationResults, data, initialCapital);
+    },
+
+    async runBacktestWithOptimizedParams(optimizationResults, data, initialCapital) {
+        const strategies = [];
+
+        for (const [strategyName, optResult] of Object.entries(optimizationResults)) {
+            const strategyType = this.getStrategyTypeFromName(strategyName);
+            const bestParams = optResult.bestResult.params;
+
+            let strategy;
+            switch(strategyType) {
+                case 'momentumRSI':
+                    strategy = new MomentumRSI(
+                        initialCapital,
+                        bestParams.rsiPeriod,
+                        bestParams.oversold,
+                        bestParams.overbought
+                    );
+                    break;
+                case 'meanReversion':
+                    strategy = new MeanReversion(
+                        initialCapital,
+                        bestParams.bbPeriod,
+                        bestParams.bbStd
+                    );
+                    break;
+                case 'gapTrading':
+                    strategy = new GapTrading(initialCapital, bestParams.gapThreshold);
+                    break;
+                case 'macdCrossover':
+                    strategy = new MACDCrossover(initialCapital);
+                    break;
+            }
+
+            if (strategy) {
+                strategies.push({
+                    strategy: strategy,
+                    stopLoss: bestParams.stopLoss,
+                    takeProfit: bestParams.takeProfit
+                });
+            }
+        }
+
+        // Run backtest with optimized parameters
+        const results = {};
+        for (const { strategy, stopLoss, takeProfit } of strategies) {
+            const result = this.backtester.runStrategy(strategy, data, stopLoss, takeProfit);
+            const metrics = this.backtester.calculateMetrics(
+                initialCapital,
+                result.finalCapital,
+                result.trades,
+                result.equityCurve
+            );
+
+            results[strategy.name] = {
+                strategyName: strategy.name,
+                metrics: metrics,
+                trades: result.trades,
+                equityCurve: result.equityCurve,
+                finalCapital: result.finalCapital
+            };
+        }
+
+        this.currentResults = results;
+        this.displayResults(results);
+        this.displayOptimizationResults();
+    },
+
+    getStrategyTypeFromName(name) {
+        const mapping = {
+            'Momentum RSI': 'momentumRSI',
+            'Mean Reversion': 'meanReversion',
+            'Gap Trading': 'gapTrading',
+            'MACD Crossover': 'macdCrossover'
+        };
+        return mapping[name];
+    },
+
+    displayOptimizationResults() {
+        if (!this.optimizationResults) return;
+
+        const container = document.getElementById('optimizationResults');
+        const tablesContainer = document.getElementById('optimizationTables');
+
+        container.style.display = 'block';
+        tablesContainer.innerHTML = '';
+
+        for (const [strategyName, optResult] of Object.entries(this.optimizationResults)) {
+            const strategyDiv = document.createElement('div');
+            strategyDiv.className = 'optimization-strategy';
+
+            const title = document.createElement('h3');
+            title.innerHTML = `
+                ${strategyName}
+                <span class="best-params-badge">Топ-5 комбинаций из ${optResult.totalCombinations}</span>
+            `;
+            strategyDiv.appendChild(title);
+
+            const table = document.createElement('table');
+            table.className = 'optimization-table';
+
+            const strategyType = this.getStrategyTypeFromName(strategyName);
+
+            table.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Параметры</th>
+                        <th>Return %</th>
+                        <th>Win Rate %</th>
+                        <th>Sharpe</th>
+                        <th>Trades</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${optResult.topResults.slice(0, 5).map((result, index) => `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${this.optimizer.formatParams(strategyType, result.params)}</td>
+                            <td class="${result.metrics.totalReturn >= 0 ? 'positive' : 'negative'}">
+                                ${result.metrics.totalReturn > 0 ? '+' : ''}${result.metrics.totalReturn}%
+                            </td>
+                            <td>${result.metrics.winRate}%</td>
+                            <td>${result.metrics.sharpeRatio}</td>
+                            <td>${result.metrics.totalTrades}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            `;
+
+            strategyDiv.appendChild(table);
+            tablesContainer.appendChild(strategyDiv);
         }
     },
 

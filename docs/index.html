@@ -112,6 +112,17 @@
                     </div>
                 </div>
 
+                <!-- Optimization -->
+                <div class="optimization-section">
+                    <label class="checkbox-label optimize-label">
+                        <input type="checkbox" id="optimizeParams">
+                        <span>🔧 Оптимизировать параметры (Grid Search)</span>
+                    </label>
+                    <small class="optimize-hint">
+                        Найдет лучшие параметры для каждой стратегии. Займет 10-30 секунд на стратегию.
+                    </small>
+                </div>
+
                 <!-- Run Button -->
                 <button id="runBacktest" class="btn-primary">
                     🚀 Запустить бэктест
@@ -121,11 +132,24 @@
             <!-- Loading Indicator -->
             <div id="loading" class="loading" style="display:none;">
                 <div class="spinner"></div>
-                <p>Выполняется бэктест...</p>
+                <p id="loadingText">Выполняется бэктест...</p>
+                <div id="optimizationProgress" style="display:none; margin-top: 15px;">
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill"></div>
+                    </div>
+                    <p id="progressText" style="margin-top: 10px; color: #666;"></p>
+                </div>
             </div>
 
             <!-- Results Section -->
             <section id="results" class="results-section" style="display:none;">
+                <!-- Optimization Results -->
+                <div id="optimizationResults" class="results-card" style="display:none;">
+                    <h2>🔧 Результаты оптимизации</h2>
+                    <p class="optimization-summary">Найдены оптимальные параметры для каждой стратегии</p>
+                    <div id="optimizationTables"></div>
+                </div>
+
                 <!-- Comparison Table -->
                 <div class="results-card">
                     <h2>📊 Сравнение стратегий</h2>
@@ -205,6 +229,7 @@
 
     <script src="js/strategies.js"></script>
     <script src="js/backtester.js"></script>
+    <script src="js/optimizer.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/app.js"></script>
 </body>

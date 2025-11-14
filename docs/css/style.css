@@ -347,6 +347,127 @@ canvas {
     margin-top: 20px;
 }
 
+/* Optimization Section */
+.optimization-section {
+    background: linear-gradient(135deg, rgba(255, 127, 14, 0.1), rgba(255, 159, 64, 0.1));
+    padding: 20px;
+    border-radius: 12px;
+    margin-top: 20px;
+    border: 2px dashed var(--secondary-color);
+}
+
+.optimize-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.optimize-label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.optimize-hint {
+    display: block;
+    margin-top: 10px;
+    margin-left: 30px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 30px;
+    background: var(--border-color);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    border-radius: 15px;
+    transition: width 0.3s ease;
+    width: 0%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Optimization Results */
+.optimization-summary {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-size: 1rem;
+}
+
+.optimization-tables {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.optimization-strategy {
+    background: rgba(31, 119, 180, 0.05);
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.optimization-strategy h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.best-params-badge {
+    background: var(--success-color);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.optimization-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin-top: 10px;
+}
+
+.optimization-table th,
+.optimization-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.optimization-table thead {
+    background: var(--primary-color);
+    color: white;
+}
+
+.optimization-table tbody tr:first-child {
+    background: rgba(44, 160, 44, 0.1);
+    font-weight: 600;
+}
+
+.optimization-table tbody tr:hover {
+    background: rgba(31, 119, 180, 0.05);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .header-content h1 {
