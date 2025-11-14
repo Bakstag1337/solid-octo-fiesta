@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backtesting Platform - Дейтрейдинг Стратегии</title>
+    <meta name="description" content="Тестирование торговых стратегий на исторических данных">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>📈 Backtesting Platform</h1>
+                <p class="subtitle">Тестирование дейтрейдинг стратегий на исторических данных</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Configuration Panel -->
+            <section class="config-panel">
+                <h2>⚙️ Настройки</h2>
+
+                <div class="config-grid">
+                    <!-- Stock Selection -->
+                    <div class="config-group">
+                        <label for="ticker">Тикер акции</label>
+                        <input type="text" id="ticker" value="AAPL" placeholder="AAPL, TSLA, MSFT...">
+                        <small>Введите символ акции или загрузите CSV</small>
+                    </div>
+
+                    <!-- Data Source -->
+                    <div class="config-group">
+                        <label>Источник данных</label>
+                        <div class="radio-group">
+                            <label class="radio-label">
+                                <input type="radio" name="dataSource" value="demo" checked>
+                                <span>Demo данные</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="dataSource" value="csv">
+                                <span>Загрузить CSV</span>
+                            </label>
+                        </div>
+                        <input type="file" id="csvFile" accept=".csv" style="display:none;">
+                        <button id="uploadBtn" class="btn-secondary" style="display:none;">Выбрать файл</button>
+                    </div>
+
+                    <!-- Period Selection -->
+                    <div class="config-group">
+                        <label for="period">Период тестирования</label>
+                        <select id="period">
+                            <option value="30">1 месяц (30 дней)</option>
+                            <option value="90" selected>3 месяца (90 дней)</option>
+                            <option value="180">6 месяцев (180 дней)</option>
+                            <option value="365">1 год (365 дней)</option>
+                        </select>
+                    </div>
+
+                    <!-- Strategy Selection -->
+                    <div class="config-group full-width">
+                        <label>Стратегии для тестирования</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="strategy" value="momentumRSI" checked>
+                                <span>Momentum RSI</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="strategy" value="meanReversion" checked>
+                                <span>Mean Reversion</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="strategy" value="gapTrading">
+                                <span>Gap Trading</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="strategy" value="macdCrossover">
+                                <span>MACD Crossover</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Risk Management -->
+                <div class="risk-management">
+                    <h3>💼 Риск-менеджмент</h3>
+                    <div class="config-grid">
+                        <div class="config-group">
+                            <label for="initialCapital">Начальный капитал ($)</label>
+                            <input type="number" id="initialCapital" value="10000" min="1000" step="1000">
+                        </div>
+                        <div class="config-group">
+                            <label for="stopLoss">Stop Loss (%)</label>
+                            <input type="number" id="stopLoss" value="2" min="0.5" max="10" step="0.5">
+                        </div>
+                        <div class="config-group">
+                            <label for="takeProfit">Take Profit (%)</label>
+                            <input type="number" id="takeProfit" value="4" min="1" max="20" step="0.5">
+                        </div>
+                        <div class="config-group">
+                            <label for="rsiPeriod">RSI Period</label>
+                            <input type="number" id="rsiPeriod" value="14" min="5" max="30">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Run Button -->
+                <button id="runBacktest" class="btn-primary">
+                    🚀 Запустить бэктест
+                </button>
+            </section>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading" style="display:none;">
+                <div class="spinner"></div>
+                <p>Выполняется бэктест...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="results" class="results-section" style="display:none;">
+                <!-- Comparison Table -->
+                <div class="results-card">
+                    <h2>📊 Сравнение стратегий</h2>
+                    <div class="table-container">
+                        <table id="comparisonTable" class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Стратегия</th>
+                                    <th>Return %</th>
+                                    <th>Win Rate %</th>
+                                    <th>Sharpe</th>
+                                    <th>Max DD %</th>
+                                    <th>Profit Factor</th>
+                                    <th>Trades</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="charts-grid">
+                    <!-- Equity Curve -->
+                    <div class="results-card">
+                        <h3>📈 Кривые роста капитала</h3>
+                        <canvas id="equityChart"></canvas>
+                    </div>
+
+                    <!-- Metrics Comparison -->
+                    <div class="results-card">
+                        <h3>📊 Сравнение метрик</h3>
+                        <canvas id="metricsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Trade History -->
+                <div class="results-card">
+                    <h2>📋 История сделок</h2>
+                    <div class="strategy-selector">
+                        <label for="strategySelect">Выберите стратегию:</label>
+                        <select id="strategySelect"></select>
+                    </div>
+                    <div class="table-container">
+                        <table id="tradesTable" class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата входа</th>
+                                    <th>Цена входа</th>
+                                    <th>Дата выхода</th>
+                                    <th>Цена выхода</th>
+                                    <th>P&L %</th>
+                                    <th>P&L $</th>
+                                    <th>Причина</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <button id="downloadCsv" class="btn-secondary">📥 Скачать CSV</button>
+                </div>
+
+                <!-- Best Strategy -->
+                <div id="bestStrategy" class="best-strategy"></div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>
+                <a href="https://github.com/Bakstag1337/solid-octo-fiesta" target="_blank">GitHub</a>
+                | Made with ❤️ for traders
+                | Not financial advice
+            </p>
+        </footer>
+    </div>
+
+    <script src="js/strategies.js"></script>
+    <script src="js/backtester.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
