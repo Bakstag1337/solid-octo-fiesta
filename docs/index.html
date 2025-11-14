@@ -38,12 +38,16 @@
                         <label>Источник данных</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="dataSource" value="demo" checked>
-                                <span>Demo данные</span>
+                                <input type="radio" name="dataSource" value="real" checked>
+                                <span>📡 Yahoo Finance</span>
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="dataSource" value="demo">
+                                <span>🎲 Demo данные</span>
                             </label>
                             <label class="radio-label">
                                 <input type="radio" name="dataSource" value="csv">
-                                <span>Загрузить CSV</span>
+                                <span>📁 CSV файл</span>
                             </label>
                         </div>
                         <input type="file" id="csvFile" accept=".csv" style="display:none;">

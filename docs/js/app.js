@@ -100,16 +100,27 @@ const app = {
         return strategies;
     },
 
-    getData() {
+    async getData() {
         const dataSource = document.querySelector('input[name="dataSource"]:checked').value;
 
         if (dataSource === 'csv' && this.customData) {
             return this.customData;
         }
 
-        // Generate mock data
+        if (dataSource === 'demo') {
+            // Generate mock data
+            const period = parseInt(document.getElementById('period').value);
+            return this.backtester.generateMockData(period);
+        }
+
+        // Fetch real data from Yahoo Finance
+        const ticker = document.getElementById('ticker').value.trim().toUpperCase();
+        if (!ticker) {
+            throw new Error('Введите тикер акции');
+        }
+
         const period = parseInt(document.getElementById('period').value);
-        return this.backtester.generateMockData(period);
+        return await this.backtester.fetchRealData(ticker, period);
     },
 
     async runBacktest() {

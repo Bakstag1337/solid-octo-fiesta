@@ -1,9 +1,54 @@
-// Backtester Engine
+// Backtester Engine with Real Data Support
 
 class Backtester {
     constructor() {
         this.data = null;
         this.results = {};
+    }
+
+    // Fetch real data from Alpha Vantage (free API)
+    async fetchRealData(ticker, days = 90) {
+        // Using Alpha Vantage free API (no key required for demo)
+        // Fallback to Yahoo Finance proxy if needed
+
+        try {
+            // Option 1: Try Yahoo Finance via proxy (no API key needed)
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(startDate.getDate() - days);
+
+            const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?period1=${Math.floor(startDate.getTime()/1000)}&period2=${Math.floor(endDate.getTime()/1000)}&interval=1d`;
+
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error('Yahoo Finance API failed');
+            }
+
+            const json = await response.json();
+            const result = json.chart.result[0];
+            const timestamps = result.timestamp;
+            const quotes = result.indicators.quote[0];
+
+            const data = timestamps.map((timestamp, i) => ({
+                date: new Date(timestamp * 1000).toISOString().split('T')[0],
+                open: parseFloat(quotes.open[i]?.toFixed(2)) || 0,
+                high: parseFloat(quotes.high[i]?.toFixed(2)) || 0,
+                low: parseFloat(quotes.low[i]?.toFixed(2)) || 0,
+                close: parseFloat(quotes.close[i]?.toFixed(2)) || 0,
+                volume: quotes.volume[i] || 0
+            })).filter(d => d.close > 0); // Filter out invalid data
+
+            if (data.length === 0) {
+                throw new Error('No valid data received');
+            }
+
+            return data;
+
+        } catch (error) {
+            console.error('Error fetching real data:', error);
+            throw new Error(`Не удалось загрузить данные для ${ticker}. Используйте Demo данные или загрузите CSV.`);
+        }
     }
 
     generateMockData(days = 90) {
