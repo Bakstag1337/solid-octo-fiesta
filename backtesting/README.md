@@ -4,6 +4,34 @@
 
 ![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
+![Streamlit](https://img.shields.io/badge/streamlit-1.31-red.svg)
+![Docker](https://img.shields.io/badge/docker-ready-blue.svg)
+
+## 🌐 Быстрый старт - Веб-версия
+
+**Вариант 1: Опубликовать на Streamlit Cloud (БЕСПЛАТНО)**
+
+[![Deploy to Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io)
+
+1. Перейти на [share.streamlit.io](https://share.streamlit.io)
+2. Авторизоваться через GitHub
+3. Указать:
+   - Repository: `Bakstag1337/solid-octo-fiesta`
+   - Branch: `claude/backtesting-platform-daytrading-01DJkp8GuYBufZYHv9181NRr`
+   - Main file: `backtesting/frontend/app.py`
+4. Получить публичную ссылку для доступа
+
+**Вариант 2: Запустить локально**
+
+```bash
+cd backtesting
+chmod +x run.sh
+./run.sh
+```
+
+Откроется в браузере: `http://localhost:8501`
+
+📖 **Подробнее:** [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## ✨ Возможности
 
