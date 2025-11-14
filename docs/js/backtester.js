@@ -8,6 +8,19 @@ class Backtester {
 
     // Fetch real data - multiple sources with fallback
     async fetchRealData(ticker, days = 90) {
+        // First, try embedded data (bypasses CORS completely)
+        try {
+            const embedded = getEmbeddedData(ticker);
+            if (embedded && embedded.data && embedded.data.length > 0) {
+                console.log(`✅ Using embedded data for ${ticker}: ${embedded.data.length} days available`);
+                // Return last N days
+                const sliceStart = Math.max(0, embedded.data.length - days);
+                return embedded.data.slice(sliceStart);
+            }
+        } catch (error) {
+            console.warn('Embedded data not available for', ticker);
+        }
+
         // Try multiple data sources in order
         const methods = [
             () => this.fetchFromYahooProxy(ticker, days),
@@ -28,7 +41,7 @@ class Backtester {
         }
 
         // If all methods fail
-        throw new Error(`Не удалось загрузить данные для ${ticker}. Используйте Demo данные или загрузите CSV.`);
+        throw new Error(`Не удалось загрузить данные для ${ticker}. Доступные тикеры: ${getAvailableTickers().join(', ')}. Используйте Demo данные или загрузите CSV.`);
     }
 
     // Method 1: Yahoo Finance via CORS proxy

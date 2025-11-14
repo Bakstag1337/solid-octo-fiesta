@@ -30,7 +30,7 @@
                     <div class="config-group">
                         <label for="ticker">Тикер акции</label>
                         <input type="text" id="ticker" value="AAPL" placeholder="AAPL, TSLA, MSFT...">
-                        <small>Введите символ акции или загрузите CSV</small>
+                        <small>Доступные тикеры: <strong>AAPL, TSLA, MSFT</strong> | Или загрузите CSV</small>
                     </div>
 
                     <!-- Data Source -->
@@ -38,8 +38,8 @@
                         <label>Источник данных</label>
                         <div class="radio-group">
                             <label class="radio-label">
-                                <input type="radio" name="dataSource" value="real" checked>
-                                <span>📡 Yahoo Finance</span>
+                                <input type="radio" name="dataSource" value="embedded" checked>
+                                <span>📊 Embedded Data (AAPL/TSLA/MSFT)</span>
                             </label>
                             <label class="radio-label">
                                 <input type="radio" name="dataSource" value="demo">
@@ -227,6 +227,7 @@
         </footer>
     </div>
 
+    <script src="js/embedded-data.js"></script>
     <script src="js/strategies.js"></script>
     <script src="js/backtester.js"></script>
     <script src="js/optimizer.js"></script>
